@@ -1,84 +1,96 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>chajiage</title>
+  <head>
+    <title>查价格</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <style>
-        body {
-            font-size: 80px;
-            line-height: 0;
-            font-family: "Sofia Pro", sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: row;
-        }
-        .column {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            width:35%;
-            height: 100%;
-        }
-        .title {
-            font-size: 80px;
-            margin-bottom: 10px;
-        }
-        .logo {
-            width: 100px;
-            height: 100px;
-            margin-right: 20px;
-        }
-        .price {
-            font-size: 80px;
-            display: flex;
-            align-items: center;
-        }
-
+        
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-size: 4vw;
+        font-family: "Sofia Pro", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+       
+    
+      }
+      .column {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 35%;
+      }
+      .title {
+        font-size: 5vw;
+        margin-bottom: 3vw;
+      }
+      .logo {
+        width: 5vw;
+        height: 5vw;
+        margin-right: 1vw;
+      }
+      .price {
+        font-size: 4vw;
+        display: flex;
+        align-items: center;
+      }
+     
     </style>
-</head>
-<body>
+  </head>
+  
+  <body>
     <div class="column">
-        <h1 class="title">BTC/USDT</h1>
-        <p class="price"><img class="logo" src="https://cryptologos.cc/logos/bitcoin-btc-logo.svg">$<span id="btc-price"></span></p>
+      <h1 class="title">BTC/USDT</h1>
+      <p class="price">
+        <img
+          class="logo"
+          src="https://cryptologos.cc/logos/bitcoin-btc-logo.svg"
+        />
+        $<span id="btc-price"></span>
+      </p>
     </div>
     <div class="column">
-        <h1 class="title">ETH/USDT</h1>
-        <p class="price"><img class="logo" src="https://cryptologos.cc/logos/ethereum-eth-logo.svg">$<span id="eth-price"></span></p>
+      <h1 class="title">ETH/USDT</h1>
+      <p class="price">
+        <img
+          class="logo"
+          src="https://cryptologos.cc/logos/ethereum-eth-logo.svg"
+        />
+        $<span id="eth-price"></span>
+      </p>
     </div>
     <script>
-        const binanceApiUrl = 'https://api.binance.com/api/v3/ticker/price?symbol=';
-        const symbols = ['BTCUSDT', 'ETHUSDT'];
-        const prices = {'BTCUSDT': '#btc-price', 'ETHUSDT': '#eth-price'};
-
-        function getPrice(symbol) {
-            $.get(binanceApiUrl + symbol, function(data) {
-                $(prices[symbol]).text(parseFloat(data.price).toFixed(2));
-            }).fail(function() {
-                $(prices[symbol]).text('获取价格失败');
-            });
-        }
-
-        $(function() {
-            symbols.forEach(function(symbol) {
-                getPrice(symbol);
-                setInterval(function() {
-                    getPrice(symbol);
-                }, 1000);
-            });
-        });
-
-        function copyUrl() {
-            navigator.clipboard.writeText(window.location.href);
-            alert('已成功复制网页链接到剪贴板！');
-        }
         
-    </script>
-    <div style="display: flex; justify-content: center; align-items: center; position: fixed; bottom: 50px; z-index: 999;">
-        <button style="border: none; background-color: rgba(255, 255, 255, 0.7); padding: 20px; border-radius: 20px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3); font-size: 24px; color: #333; font-family: Arial, sans-serif;" onclick="copyUrl()">分享</button>
-    </div>
-</body>
+      $(function () {
+        const btcApiURL = "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT";
+        const ethApiURL = "https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT";
+        const $btcPrice = $("#btc-price");
+        const $ethPrice = $("#eth-price");
+
+    const getPrice = (apiUrl, $element) => {
+      $.get(apiUrl, (data) => {
+        const price = parseFloat(data.price).toFixed(2);
+        $element.text(price);
+      }).fail(() => {
+        $element.text(`获取${$element.attr("id")}价格失败`);
+      });
+    };
+getPrice(btcApiURL, $btcPrice);
+getPrice(ethApiURL, $ethPrice);
+
+setInterval(() => getPrice(btcApiURL, $btcPrice), 1000);
+setInterval(() => getPrice(ethApiURL, $ethPrice), 1000);
+});
+</script>
+
+  </body>
 </html>
