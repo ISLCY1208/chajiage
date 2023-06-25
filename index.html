@@ -1,96 +1,190 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>查价格</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<head>
+    <title>查价格2.0</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        font-size: 4vw;
-        font-family: "Sofia Pro", sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-       
-    
-      }
-      .column {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        width: 35%;
-      }
-      .title {
-        font-size: 5vw;
-        margin-bottom: 3vw;
-      }
-      .logo {
-        width: 5vw;
-        height: 5vw;
-        margin-right: 1vw;
-      }
-      .price {
-        font-size: 4vw;
-        display: flex;
-        align-items: center;
-      }
-     
+        body {
+            background: linear-gradient(to bottom, #f2f2f2, #e6e6e6);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        /* 常驻币种价格区域 */
+        .coins {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .coin {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            width: 400px;
+            justify-content: center;
+        }
+
+        .coin-logo {
+            width: 35px;
+            height: 35px;
+            margin-right: 20px;
+        }
+
+        .coin-name {
+            font-size: 30px;
+            font-weight: bold;
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+
+        .coin-price {
+            font-size: 30px;
+            font-weight: bold;
+            margin-left: 10px;
+            margin-bottom: 0;
+        }
+
+        /* 搜索区域 */
+        .search {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .search input[type="text"] {
+            padding: 10px;
+            font-size: 20px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+            flex-grow: 1;
+        }
+
+        /* 搜索结果区域 */
+        .result {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result #tokenPrice {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .result #error {
+            color: red;
+            font-size: 20px;
+            margin-top: 10px;
+        }
     </style>
-  </head>
-  
-  <body>
-    <div class="column">
-      <h1 class="title">BTC/USDT</h1>
-      <p class="price">
-        <img
-          class="logo"
-          src="https://cryptologos.cc/logos/bitcoin-btc-logo.svg"
-        />
-        $<span id="btc-price"></span>
-      </p>
-    </div>
-    <div class="column">
-      <h1 class="title">ETH/USDT</h1>
-      <p class="price">
-        <img
-          class="logo"
-          src="https://cryptologos.cc/logos/ethereum-eth-logo.svg"
-        />
-        $<span id="eth-price"></span>
-      </p>
-    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        
-      $(function () {
-        const btcApiURL = "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT";
-        const ethApiURL = "https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT";
-        const $btcPrice = $("#btc-price");
-        const $ethPrice = $("#eth-price");
+        // 常驻币种
+        const coins = [
+            { symbol: "BTC", name: "Bitcoin", logo: "https://cryptologos.cc/logos/bitcoin-btc-logo.png" },
+            { symbol: "ETH", name: "Ethereum", logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png" }
+        ];
 
-    const getPrice = (apiUrl, $element) => {
-      $.get(apiUrl, (data) => {
-        const price = parseFloat(data.price).toFixed(2);
-        $element.text(price);
-      }).fail(() => {
-        $element.text(`获取${$element.attr("id")}价格失败`);
-      });
-    };
-getPrice(btcApiURL, $btcPrice);
-getPrice(ethApiURL, $ethPrice);
+        // 显示常驻币种价格
+        function displayCoins() {
+            coins.forEach((coin) => {
+                // 构造 API URL
+                var apiUrl = "https://api.binance.com/api/v3/ticker/price?symbol=" + coin.symbol.toUpperCase() + "USDT";
 
-setInterval(() => getPrice(btcApiURL, $btcPrice), 1000);
-setInterval(() => getPrice(ethApiURL, $ethPrice), 1000);
-});
-</script>
+                // 使用 fetch() 函数从 API 获取代币价格数据
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        // 显示代币价格数据
+                        $("#" + coin.symbol.toLowerCase() + "-price").text(Number(data.price).toFixed(2).replace(/\.?0+$/, ''));
+                    })
+                    .catch(error => {
+                        // 显示错误消息
+                        $("#" + coin.symbol.toLowerCase() + "-price").text("-");
+                    });
+            });
+        }
 
-  </body>
+        // 搜索币种价格
+        function searchToken() {
+            // 获取输入框中的代币名称
+            var tokenName = $("#tokenName").val();
+
+            // 构造 API URL
+            var apiUrl = "https://api.binance.com/api/v3/ticker/price?symbol=" + tokenName.toUpperCase() + "USDT";
+
+            // 使用 fetch() 函数从 API 获取代币价格数据
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // 显示代币价格数据
+                    $("#tokenPrice").text(Number(data.price).toFixed(3).replace(/\.?0+$/, ''));
+                    $("#error").hide();
+                })
+                .catch(error => {
+                    // 显示错误消息
+                    $("#tokenPrice").text("-");
+                    $("#error").text("Error: " + error.message);
+                    $("#error").show();
+                });
+        }
+
+        // 更新搜索结果
+        function updateTokenPrice() {
+            var tokenName = $("#tokenName").val();
+            if (tokenName) {
+                searchToken();
+            }
+        }
+
+        // 初始化页面
+        $(document).ready(() => {
+            // 显示常驻币种价格
+            displayCoins();
+
+            // 每秒钟更新常驻币种价格
+            setInterval(() => {
+                displayCoins();
+            }, 1000);
+
+            // 每秒钟更新搜索结果
+            setInterval(() => {
+                updateTokenPrice();
+            }, 1000);
+        });
+    </script>
+</head>
+<body>
+    <div class="coins">
+        <div class="coin">
+            <img class="coin-logo" src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="BTC Logo">
+            <div class="coin-name">Bitcoin</div>
+            <div class="coin-price" id="btc-price">-</div>
+        </div>
+        <div class="coin">
+            <img class="coin-logo" src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="ETH Logo">
+            <div class="coin-name">Ethereum</div>
+            <div class="coin-price" id="eth-price">-</div>
+        </div>
+    </div>
+    <div class="search">
+        <input type="text" id="tokenName" placeholder="输入代币名称">
+    </div>
+    <div class="result">
+        <div id="tokenPrice"></div>
+        <div id="error"></div>
+    </div>
+</body>
 </html>
