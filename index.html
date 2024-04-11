@@ -18,38 +18,37 @@
         /* 常驻币种价格区域 */
         .coins {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            width: 800px;
             margin-bottom: 20px;
         }
 
         .coin {
+            flex-grow: 1;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-right: 20px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 10px;
-            width: 400px;
-            justify-content: center;
         }
 
         .coin-logo {
-            width: 35px;
-            height: 35px;
-            margin-right: 20px;
+            width: 60px;
+            height: 60px;
+            margin-bottom: 10px;
         }
 
         .coin-name {
-            font-size: 30px;
+            font-size: 24px;
             font-weight: bold;
-            flex-grow: 1;
-            margin-bottom: 0;
+            margin-bottom: 10px;
         }
 
         .coin-price {
-            font-size: 30px;
+            font-size: 24px;
             font-weight: bold;
-            margin-left: 10px;
-            margin-bottom: 0;
         }
 
         /* 搜索区域 */
@@ -92,9 +91,10 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         // 常驻币种
-        const coins = [
+        var coins = [
             { symbol: "BTC", name: "Bitcoin", logo: "https://cryptologos.cc/logos/bitcoin-btc-logo.png" },
-            { symbol: "ETH", name: "Ethereum", logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png" }
+            { symbol: "ETH", name: "Ethereum", logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png" },
+            { symbol: "ENA", name: "Ethena", logo: "https://cryptologos.cc/logos/ethena-ena-logo.png" }
         ];
 
         // 显示常驻币种价格
@@ -108,7 +108,9 @@
                     .then(response => response.json())
                     .then(data => {
                         // 显示代币价格数据
-                        $("#" + coin.symbol.toLowerCase() + "-price").text(Number(data.price).toFixed(2).replace(/\.?0+$/, ''));
+                        var coinElement = $("#" + coin.symbol.toLowerCase() + "-price");
+                        coinElement.text(Number(data.price).toFixed(3).replace(/\.?0+$/, ''));
+                        coinElement.closest(".coin").show(); // 显示币种价格
                     })
                     .catch(error => {
                         // 显示错误消息
@@ -120,17 +122,17 @@
         // 搜索币种价格
         function searchToken() {
             // 获取输入框中的代币名称
-            var tokenName = $("#tokenName").val();
+            var tokenName = $("#tokenName").val().toUpperCase();
 
             // 构造 API URL
-            var apiUrl = "https://api.binance.com/api/v3/ticker/price?symbol=" + tokenName.toUpperCase() + "USDT";
+            var apiUrl = "https://api.binance.com/api/v3/ticker/price?symbol=" + tokenName + "USDT";
 
             // 使用 fetch() 函数从 API 获取代币价格数据
             fetch(apiUrl)
                 .then(response => response.json())
                 .then(data => {
                     // 显示代币价格数据
-                    $("#tokenPrice").text(Number(data.price).toFixed(3).replace(/\.?0+$/, ''));
+                    $("#tokenPrice").text(Number(data.price).toFixed(3));
                     $("#error").hide();
                 })
                 .catch(error => {
@@ -149,8 +151,40 @@
             }
         }
 
+        // 添加自定义常驻代币
+        function addCustomCoin() {
+            var customCoinSymbol = $("#customCoinSymbol").val().toUpperCase();
+            var customCoinName = $("#customCoinName").val();
+            var customCoinLogo = $("#customCoinLogo").val();
+            
+            if (customCoinSymbol && customCoinName && customCoinLogo) {
+                coins.push({
+                    symbol: customCoinSymbol,
+                    name: customCoinName,
+                    logo: customCoinLogo
+                });
+                
+                // 创建新的币种显示框
+                var newCoinElement = $('<div class="coin">' +
+                                            '<img class="coin-logo" src="' + customCoinLogo + '" alt="' + customCoinName + ' Logo">' +
+                                            '<div class="coin-name">' + customCoinName + '</div>' +
+                                            '<div class="coin-price" id="' + customCoinSymbol.toLowerCase() + '-price">-</div>' +
+                                       '</div>');
+                
+                $(".coins").append(newCoinElement);
+                
+                // 清空输入框
+                $("#customCoinSymbol").val('');
+                $("#customCoinName").val('');
+                $("#customCoinLogo").val('');
+            }
+        }
+
         // 初始化页面
         $(document).ready(() => {
+            // 隐藏所有币种价格，只有当价格获取成功时才显示
+            $(".coin").hide();
+
             // 显示常驻币种价格
             displayCoins();
 
@@ -168,15 +202,20 @@
 </head>
 <body>
     <div class="coins">
-        <div class="coin">
+        <div class="coin" id="btc-coin">
             <img class="coin-logo" src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="BTC Logo">
             <div class="coin-name">Bitcoin</div>
             <div class="coin-price" id="btc-price">-</div>
         </div>
-        <div class="coin">
+        <div class="coin" id="eth-coin">
             <img class="coin-logo" src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="ETH Logo">
             <div class="coin-name">Ethereum</div>
             <div class="coin-price" id="eth-price">-</div>
+        </div>
+        <div class="coin" id="ena-coin">
+            <img class="coin-logo" src="https://cryptologos.cc/logos/ethena-ena-logo.png" alt="ENA Logo">
+            <div class="coin-name">Ethena</div>
+            <div class="coin-price" id="ena-price">-</div>
         </div>
     </div>
     <div class="search">
@@ -185,6 +224,13 @@
     <div class="result">
         <div id="tokenPrice"></div>
         <div id="error"></div>
+    </div>
+    <div class="custom-coin">
+        <h3>添加自定义常驻代币</h3>
+        <input type="text" id="customCoinSymbol" placeholder="代币符号（如：ABC）">
+        <input type="text" id="customCoinName" placeholder="代币名称（如：ABC Token）">
+        <input type="text" id="customCoinLogo" placeholder="代币 Logo URL">
+        <button onclick="addCustomCoin()">添加</button>
     </div>
 </body>
 </html>
